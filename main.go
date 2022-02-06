@@ -58,6 +58,9 @@ func main() {
 		0.5, -0.5, 0.0,
 		0.0, 0.5, 0.0,
 	}
+	indices := []uint32{
+		0, 1, 2,
+	}
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -71,12 +74,17 @@ func main() {
 	gl.DepthFunc(gl.LESS)
 	gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 
+	var ebo uint32
+	gl.GenBuffers(1, &ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*4, gl.Ptr(indices), gl.STATIC_DRAW)
+
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		gl.UseProgram(program)
 		gl.BindVertexArray(vao)
-		gl.DrawArrays(gl.TRIANGLES, 0, 3*3)
+		gl.DrawElementsWithOffset(gl.TRIANGLES, 3, gl.UNSIGNED_INT, 0)
 
 		window.SwapBuffers()
 		glfw.PollEvents()
