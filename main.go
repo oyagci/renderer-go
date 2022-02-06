@@ -53,7 +53,31 @@ func main() {
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
 
+	vertices := []float32{
+		-0.5, -0.5, 0.0,
+		0.5, -0.5, 0.0,
+		0.0, 0.5, 0.0,
+	}
+
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
+
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 3*4, 0)
+
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
+	gl.ClearColor(0.1, 0.1, 0.1, 1.0)
+
 	for !window.ShouldClose() {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+		gl.UseProgram(program)
+		gl.BindVertexArray(vao)
+		gl.DrawArrays(gl.TRIANGLES, 0, 3*3)
+
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
@@ -134,6 +158,6 @@ var FRAGMENT_SHADER_SRC = `
 out vec4 fragColor;
 
 void main() {
-	fragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	fragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 ` + "\x00"
