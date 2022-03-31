@@ -1,10 +1,9 @@
-package glBuffers
+package main
 
 import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
-	"github.com/oyagci/renderer-go/renderer"
 )
 
 type BufferObjectID uint32
@@ -18,7 +17,7 @@ type BufferObject struct {
 	layout BufferLayout
 }
 
-func CreateBufferObject(layout BufferLayout, mesh renderer.OpenGLMesh) BufferObject {
+func CreateBufferObject(layout BufferLayout, mesh OpenGLMesh) BufferObject {
 	bufferObject := BufferObject{
 		id:     generateBufferObjectObject(),
 		layout: layout,
@@ -29,8 +28,8 @@ func CreateBufferObject(layout BufferLayout, mesh renderer.OpenGLMesh) BufferObj
 	indicesSize := mesh.GetIndicesSize()
 
 	gl.NamedBufferStorage(uint32(bufferObject.id), verticesSize+indicesSize, gl.Ptr(meshData.Vertices), gl.DYNAMIC_STORAGE_BIT)
-	gl.NamedBufferSubData(uint32(bufferObject.id), 0, verticesSize, gl.Ptr(meshData.Vertices))
-	gl.NamedBufferSubData(uint32(bufferObject.id), verticesSize, indicesSize, gl.Ptr(meshData.Indices))
+	gl.NamedBufferSubData(uint32(bufferObject.id), mesh.verticesOffset, verticesSize, gl.Ptr(meshData.Vertices))
+	gl.NamedBufferSubData(uint32(bufferObject.id), mesh.indicesOffset, indicesSize, gl.Ptr(meshData.Indices))
 
 	return bufferObject
 }

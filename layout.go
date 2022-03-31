@@ -1,4 +1,4 @@
-package glBuffers
+package main
 
 type EShaderDataType uint64
 

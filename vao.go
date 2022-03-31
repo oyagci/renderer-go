@@ -1,4 +1,4 @@
-package glBuffers
+package main
 
 import (
 	"github.com/go-gl/gl/v4.6-core/gl"
@@ -56,12 +56,13 @@ func (vao *VertexArrayObject) AddBufferObject(buffer *BufferObject) {
 
 	gl.VertexArrayElementBuffer(uint32(vao.id), uint32(buffer.Id()))
 	gl.VertexArrayVertexBuffer(uint32(vao.id), vbBindingIdx, uint32(buffer.Id()), 0, buffer.GetLayout().GetStride())
-	bufferElements := buffer.GetLayout().GetElements()
 
-	for idx, element := range bufferElements {
-		shaderAttr := shaderTypeLayouts[element.ShaderDataType]
-		gl.EnableVertexArrayAttrib(uint32(vao.id), uint32(idx))
-		gl.VertexArrayAttribFormat(uint32(vao.id), uint32(idx), shaderAttr.n, shaderAttr.glType, false, uint32(element.Offset))
-		gl.VertexArrayAttribBinding(uint32(vao.id), uint32(idx), vbBindingIdx)
-	}
+	//bufferElements := buffer.GetLayout().GetElements()
+	//for _, element := range bufferElements {
+	//	location := gl.GetAttribLocation(p.id, gl.Str(element.Name+"\x00"))
+	//	shaderAttr := shaderTypeLayouts[element.ShaderDataType]
+	//	gl.EnableVertexArrayAttrib(uint32(vao.id), uint32(location))
+	//	gl.VertexArrayAttribFormat(uint32(vao.id), uint32(location), shaderAttr.n, shaderAttr.glType, false, uint32(element.Offset))
+	//	gl.VertexArrayAttribBinding(uint32(vao.id), uint32(location), vbBindingIdx)
+	//}
 }

@@ -7,13 +7,8 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/oyagci/renderer-go/program"
-	"github.com/oyagci/renderer-go/renderer/window"
-
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/oyagci/renderer-go/glBuffers"
-	"github.com/oyagci/renderer-go/renderer"
 )
 
 //go:embed shaders/simple.vs.glsl
@@ -102,12 +97,12 @@ func main() {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	windowProps := window.WindowProps{
+	windowProps := WindowProps{
 		Width:  800,
 		Height: 600,
 		Title:  "OpenGL Window",
 	}
-	window, err := window.CreateWindow(windowProps)
+	window, err := CreateWindow(windowProps)
 
 	if err != nil {
 		panic(err)
@@ -128,7 +123,7 @@ func main() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
 
-	shaderProgramBuilder := program.NewGLShaderProgramBuilder()
+	shaderProgramBuilder := NewGLShaderProgramBuilder()
 
 	if err := shaderProgramBuilder.AddVertexShaderFromSource(VERTEX_SHADER_SRC); err != nil {
 		log.Fatalf("%v", err)
@@ -137,6 +132,31 @@ func main() {
 	if err := shaderProgramBuilder.AddFragmentShaderFromSource(FRAGMENT_SHADER_SRC); err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	vertices := []TriangleVertex{
+		{Position: Position3{X: -0.5, Y: -0.5, Z: 0.0}, Color: Position3{X: 1.0, Y: 0.0, Z: 0.0}},
+		{Position: Position3{X: 0.5, Y: -0.5, Z: 0.0}, Color: Position3{X: 0.0, Y: 1.0, Z: 0.0}},
+		{Position: Position3{X: 0.0, Y: 0.5, Z: 0.0}, Color: Position3{X: 0.0, Y: 0.0, Z: 1.0}},
+	}
+	indices := []uint32{
+		0, 1, 2,
+	}
+	bufferLayout := NewBufferLayout([]BufferElement{
+		{
+			Name:           "position",
+			ShaderDataType: Vector3f,
+			Size:           3 * 4,
+			Normalized:     false,
+			Offset:         uint32(unsafe.Offsetof(vertices[0].Position)),
+		},
+		{
+			Name:           "color",
+			ShaderDataType: Vector3f,
+			Size:           3 * 4,
+			Normalized:     false,
+			Offset:         uint32(unsafe.Offsetof(vertices[0].Color)),
+		},
+	})
 
 	shaderProgram, err := shaderProgramBuilder.Build()
 	if err != nil {
@@ -149,36 +169,13 @@ func main() {
 		Z float32
 	}
 
-	vertices := []renderer.TriangleVertex{
-		{Position: renderer.Position3{X: -0.5, Y: -0.5, Z: 0.0}, Color: renderer.Position3{X: 1.0, Y: 0.0, Z: 0.0}},
-		{Position: renderer.Position3{X: 0.5, Y: -0.5, Z: 0.0}, Color: renderer.Position3{X: 0.0, Y: 1.0, Z: 0.0}},
-		{Position: renderer.Position3{X: 0.0, Y: 0.5, Z: 0.0}, Color: renderer.Position3{X: 0.0, Y: 0.0, Z: 1.0}},
-	}
-	indices := []uint32{
-		0, 1, 2,
-	}
+	triangleMesh := NewOpenGLMesh(vertices, indices, bufferLayout)
+	triangleMesh.UseProgram(shaderProgram)
 
-	bufferLayout := glBuffers.NewBufferLayout([]glBuffers.BufferElement{
-		{
-			Name:           "position",
-			ShaderDataType: glBuffers.Vector3f,
-			Size:           3 * 4,
-			Normalized:     false,
-			Offset:         uint32(unsafe.Offsetof(vertices[0].Position)),
-		},
-		{
-			Name:           "color",
-			ShaderDataType: glBuffers.Vector3f,
-			Size:           3 * 4,
-			Normalized:     false,
-			Offset:         uint32(unsafe.Offsetof(vertices[0].Color)),
-		},
-	})
-	triangleMesh := renderer.NewOpenGLMesh(vertices, indices)
-	bufferObject := glBuffers.CreateBufferObject(bufferLayout, triangleMesh)
+	bufferObject := CreateBufferObject(bufferLayout, triangleMesh)
 	defer bufferObject.Delete()
 
-	vertexArray := glBuffers.CreateVertexArrayObject()
+	vertexArray := CreateVertexArrayObject()
 	defer vertexArray.Delete()
 
 	vertexArray.AddBufferObject(&bufferObject)

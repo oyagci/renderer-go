@@ -1,6 +1,7 @@
-package program
+package main
 
 import (
+	"C"
 	"fmt"
 	"strings"
 
@@ -103,4 +104,18 @@ type GLShaderProgram struct {
 func (p GLShaderProgram) Bind() error {
 	gl.UseProgram(p.id)
 	return nil
+}
+
+func (p GLShaderProgram) SetupLayout(mesh OpenGLMesh) {
+	bufferElements := mesh.vertexBuffer.GetLayout().GetElements()
+	vao := uint32(mesh.vertexArray.GetId())
+	vbBindingIdx := uint32(0)
+
+	for _, element := range bufferElements {
+		location := gl.GetAttribLocation(p.id, gl.Str(element.Name+"\x00"))
+		shaderAttr := shaderTypeLayouts[element.ShaderDataType]
+		gl.EnableVertexArrayAttrib(vao, uint32(location))
+		gl.VertexArrayAttribFormat(vao, uint32(location), shaderAttr.n, shaderAttr.glType, false, uint32(element.Offset))
+		gl.VertexArrayAttribBinding(vao, uint32(location), vbBindingIdx)
+	}
 }

@@ -1,4 +1,4 @@
-package renderer
+package main
 
 import "unsafe"
 
@@ -25,9 +25,14 @@ type OpenGLMesh struct {
 	verticesOffset int
 	indicesSize    int
 	indicesOffset  int
+
+	vertexArray  VertexArrayObject
+	vertexBuffer BufferObject
+
+	shader IShaderProgram
 }
 
-func NewOpenGLMesh(vertices []TriangleVertex, indices []uint32) OpenGLMesh {
+func NewOpenGLMesh(vertices []TriangleVertex, indices []uint32, layout BufferLayout) OpenGLMesh {
 	vertexSize := uint64(unsafe.Sizeof(vertices[0]))
 	verticesSize := int(vertexSize) * len(vertices)
 
@@ -41,6 +46,12 @@ func NewOpenGLMesh(vertices []TriangleVertex, indices []uint32) OpenGLMesh {
 		indicesSize:    4 * len(indices),
 		indicesOffset:  verticesSize,
 	}
+
+	vao := CreateVertexArrayObject()
+	vbo := CreateBufferObject(layout, mesh)
+
+	mesh.vertexArray = vao
+	mesh.vertexBuffer = vbo
 
 	return mesh
 }
@@ -63,4 +74,8 @@ func (mesh OpenGLMesh) GetIndicesSize() int {
 
 func (mesh OpenGLMesh) GetIndicesOffset() int {
 	return mesh.indicesOffset
+}
+
+func (mesh *OpenGLMesh) UseProgram(shaderProgram IShaderProgram) {
+	mesh.shader = shaderProgram
 }
