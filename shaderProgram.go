@@ -2,7 +2,6 @@ package main
 
 type IShaderProgram interface {
 	Bind() error
-	SetupLayout(mesh OpenGLMesh)
 }
 
 type IShaderProgramBuilder interface {

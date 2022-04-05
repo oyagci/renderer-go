@@ -4,33 +4,33 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 )
 
-type VertexArrayObjectID uint32
+type VertexArrayId uint32
 
-type VertexArrayObject struct {
-	id      VertexArrayObjectID
+type VertexArray struct {
+	id      VertexArrayId
 	layout  *BufferLayout
 	buffers []*BufferObject
 }
 
-func CreateVertexArrayObject() VertexArrayObject {
-	return VertexArrayObject{
+func CreateVertexArrayObject() VertexArray {
+	return VertexArray{
 		id: generateVertexArray(),
 	}
 }
 
-func (vao *VertexArrayObject) Delete() {
+func (vao *VertexArray) Delete() {
 	gl.DeleteVertexArrays(1, (*uint32)(&vao.id))
 }
 
-func (vao *VertexArrayObject) GetId() VertexArrayObjectID {
+func (vao *VertexArray) GetId() VertexArrayId {
 	return vao.id
 }
 
-func generateVertexArray() VertexArrayObjectID {
+func generateVertexArray() VertexArrayId {
 	var id uint32
 	gl.CreateVertexArrays(1, &id)
 
-	return VertexArrayObjectID(id)
+	return VertexArrayId(id)
 }
 
 type ShaderAttribFormat struct {
@@ -48,21 +48,14 @@ var shaderTypeLayouts = map[EShaderDataType]ShaderAttribFormat{
 	Vector4f: {4, gl.FLOAT, 4 * 4},
 }
 
-func (vao *VertexArrayObject) AddBufferObject(buffer *BufferObject) {
+func (vao *VertexArray) AddBufferObject(buffer *BufferObject) {
 
-	vbBindingIdx := uint32(len(vao.buffers))
-
+	bindingIndex := uint32(len(vao.buffers))
 	vao.buffers = append(vao.buffers, buffer)
 
-	gl.VertexArrayElementBuffer(uint32(vao.id), uint32(buffer.Id()))
-	gl.VertexArrayVertexBuffer(uint32(vao.id), vbBindingIdx, uint32(buffer.Id()), 0, buffer.GetLayout().GetStride())
+	gl.VertexArrayVertexBuffer(uint32(vao.id), bindingIndex, uint32(buffer.Id()), 0, buffer.GetLayout().GetStride())
+}
 
-	//bufferElements := buffer.GetLayout().GetElements()
-	//for _, element := range bufferElements {
-	//	location := gl.GetAttribLocation(p.id, gl.Str(element.Name+"\x00"))
-	//	shaderAttr := shaderTypeLayouts[element.ShaderDataType]
-	//	gl.EnableVertexArrayAttrib(uint32(vao.id), uint32(location))
-	//	gl.VertexArrayAttribFormat(uint32(vao.id), uint32(location), shaderAttr.n, shaderAttr.glType, false, uint32(element.Offset))
-	//	gl.VertexArrayAttribBinding(uint32(vao.id), uint32(location), vbBindingIdx)
-	//}
+func (vao VertexArray) AddElementBuffer(buffer BufferObject) {
+	gl.VertexArrayElementBuffer(uint32(vao.id), uint32(buffer.Id()))
 }

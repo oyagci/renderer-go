@@ -170,7 +170,6 @@ func main() {
 	}
 
 	triangleMesh := NewOpenGLMesh(vertices, indices, bufferLayout)
-	triangleMesh.UseProgram(shaderProgram)
 
 	bufferObject := CreateBufferObject(bufferLayout, triangleMesh)
 	defer bufferObject.Delete()
@@ -179,6 +178,7 @@ func main() {
 	defer vertexArray.Delete()
 
 	vertexArray.AddBufferObject(&bufferObject)
+	vertexArray.AddElementBuffer(bufferObject)
 
 	for !window.GetInternal().ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -186,7 +186,7 @@ func main() {
 		shaderProgram.Bind()
 
 		gl.BindVertexArray(uint32(vertexArray.GetId()))
-		gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(triangleMesh.GetData().Indices)), gl.UNSIGNED_INT, uintptr(triangleMesh.GetIndicesOffset()))
+		gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(triangleMesh.Indices)), gl.UNSIGNED_INT, uintptr(triangleMesh.GetIndicesOffset()))
 
 		window.GetInternal().SwapBuffers()
 		glfw.PollEvents()

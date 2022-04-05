@@ -23,13 +23,12 @@ func CreateBufferObject(layout BufferLayout, mesh OpenGLMesh) BufferObject {
 		layout: layout,
 	}
 
-	meshData := mesh.GetData()
 	verticesSize := mesh.GetVerticesSize()
 	indicesSize := mesh.GetIndicesSize()
 
-	gl.NamedBufferStorage(uint32(bufferObject.id), verticesSize+indicesSize, gl.Ptr(meshData.Vertices), gl.DYNAMIC_STORAGE_BIT)
-	gl.NamedBufferSubData(uint32(bufferObject.id), mesh.verticesOffset, verticesSize, gl.Ptr(meshData.Vertices))
-	gl.NamedBufferSubData(uint32(bufferObject.id), mesh.indicesOffset, indicesSize, gl.Ptr(meshData.Indices))
+	gl.NamedBufferStorage(uint32(bufferObject.id), verticesSize+indicesSize, gl.Ptr(mesh.Vertices), gl.DYNAMIC_STORAGE_BIT)
+	gl.NamedBufferSubData(uint32(bufferObject.id), mesh.verticesOffset, verticesSize, gl.Ptr(mesh.Vertices))
+	gl.NamedBufferSubData(uint32(bufferObject.id), mesh.indicesOffset, indicesSize, gl.Ptr(mesh.Indices))
 
 	return bufferObject
 }
